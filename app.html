@@ -1,5 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Ponto</title>
+</head>
+<body>
+
+<h2>Registro de Ponto</h2>
+
 <script>
-if(!localStorage.token){
+const URL = "https://script.google.com/macros/s/AKfycbxzMn269N0I7i__tj58U7KvBaQquJZic67zzKr_9zyJ4vrpo5cDFAUDHXo1IV7sF2hZiA/exec";
+
+// 🔐 Proteção básica
+if(!localStorage.email){
   window.location.href = "login.html";
 }
 </script>
@@ -7,37 +20,40 @@ if(!localStorage.token){
 <button onclick="registrar('Entrada')">Entrada</button>
 <button onclick="registrar('Saída')">Saída</button>
 
+<button onclick="verEspelho()">Ver Espelho</button>
+
 <div id="msg"></div>
 
 <script>
-async function registrar(tipo){
+function registrar(tipo){
 
-  navigator.geolocation.getCurrentPosition(async pos => {
+  navigator.geolocation.getCurrentPosition(pos => {
 
-    if(pos.coords.accuracy > 50){
-      alert("GPS ruim");
-      return;
-    }
-
-    const res = await fetch(URL,{
-      method:"POST",
-      body:JSON.stringify({
-        acao:"registrar",
-        token:localStorage.token,
-        tipo:tipo,
-        lat:pos.coords.latitude,
-        lng:pos.coords.longitude,
-        precisao:pos.coords.accuracy,
-        ua:navigator.userAgent
-      })
+    fetch(`${URL}?acao=registrar&email=${localStorage.email}&tipo=${tipo}&lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("msg").innerText = "Registrado!";
     });
-
-    const data = await res.json();
-
-    msg.innerText = data.ok
-      ? "Registrado (" + Math.round(data.distancia) + "m)"
-      : data.msg;
 
   });
 }
+
+function verEspelho(){
+
+  fetch(`${URL}?acao=espelho&email=${localStorage.email}`)
+  .then(r => r.json())
+  .then(dados => {
+
+    let html = "<h3>Registros</h3>";
+
+    dados.forEach(r=>{
+      html += `<p>${r[3]} - ${r[4]}</p>`;
+    });
+
+    document.getElementById("msg").innerHTML = html;
+  });
+}
 </script>
+
+</body>
+</html>
