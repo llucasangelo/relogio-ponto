@@ -32,7 +32,14 @@ function registrar(tipo){
     fetch(`${URL}?acao=registrar&email=${localStorage.email}&tipo=${tipo}&lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`)
     .then(r => r.json())
     .then(data => {
-      document.getElementById("msg").innerText = "Registrado!";
+
+      if(data.ok){
+        document.getElementById("msg").innerText =
+          data.dentroArea
+          ? "✅ Registrado dentro da área"
+          : "⚠️ Fora da área (" + Math.round(data.distancia) + "m)";
+      }
+
     });
 
   });
